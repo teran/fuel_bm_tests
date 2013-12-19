@@ -16,11 +16,6 @@ if [ "$URL" == "" ] ; then
         echo "Please provide ISO URL or ISO path/file as argument"
         exit 1
 fi
-echo
-echo
-echo
-echo $BMTEST_PXECFG
-exit 0
 
 # Run our scripts
 if [ -f "$URL" ] ; then
