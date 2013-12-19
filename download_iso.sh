@@ -21,6 +21,6 @@ mkdir -p "$ISODIR" || exit 1
 fuel_iso_name=`echo $URL | egrep -o 'fuel-.*\.iso'`
 
 if [ ! -f "$ISODIR/$fuel_iso_name" ] ; then
-	wget -O "$ISODIR/$fuel_iso_name" "$URL" || exit 1
+	wget -q -O "$ISODIR/$fuel_iso_name" "$URL" || exit 1
 fi
 echo "$ISODIR/$fuel_iso_name"
