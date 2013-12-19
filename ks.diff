@@ -1,0 +1,41 @@
+--- /srv/tftp/fuel321/ks.cfg	2013-12-10 14:38:53.266044387 +0000
++++ /srv/tftp/ks_321.cfg	2013-12-10 14:32:13.082677779 +0000
+@@ -43,7 +43,8 @@
+         echo
+         echo "Possible choices: ${drives}"
+         echo
+-        read -p "Choose hard drive: " tgtdrive
++#        read -p "Choose hard drive: " tgtdrive
++	tgtdrive="sda"
+     done
+     clear
+     chvt 1
+@@ -187,6 +188,10 @@
+     fi
+ }
+ 
++echo -e "DEVICE=eth1\nBOOTPROTO=static\nIPADDR=172.16.72.143\nNETMASK=255.255.255.0\nGATEWAY=172.16.72.1\n" > /etc/sysconfig/network-scripts/ifcfg-eth1
++echo -e "DEVICE=eth2\nBOOTPROTO=static\nIPADDR=172.16.0.1\nNETMASK=255.255.255.0\n" > /etc/sysconfig/network-scripts/ifcfg-eth2
++echo -e "DEVICE=eth3\nBOOTPROTO=static\nIPADDR=192.168.50.1\nNETMASK=255.255.255.0\n" > /etc/sysconfig/network-scripts/ifcfg-eth3
++
+ # Default FQDN
+ hostname="nailgun.mirantis.com"
+ 
+@@ -278,6 +283,8 @@
+ chmod 0777 /usr/local/sbin/bootstrap_admin_node.sh
+ cp ${SOURCE}/bootstrap_admin_node.conf /etc/init/bootstrap_admin_node.conf
+ echo "ENABLED=1" > /etc/sysconfig/bootstrap_admin_node
++# Dirty hack for bare-metal automation
++sed -e 's#iface=eth0#iface=eth3#' -i /usr/local/sbin/bootstrap_admin_node.sh
+ 
+ # Copying version.yaml file. It contains COMMIT_SHA of last commit.
+ mkdir -p /etc/nailgun
+@@ -311,6 +318,8 @@
+ EOF
+ 
+ echo "sed -i \"s%\(^.*able on:\).*$%\1 http://\`ip address show eth0 | awk '/inet / {print \$2}' | cut -d/ -f1 -\`:8000%\" /etc/issue" >>/etc/rc.local
++echo >> /etc/rc.local
++echo "iptables -t nat -I POSTROUTING -s 172.16.0.0/24 -j MASQUERADE" >> /etc/rc.local
+ 
+ # Unmounting source
+ umount -f ${SOURCE}

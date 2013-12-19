@@ -1,0 +1,5 @@
+#!/bin/bash
+
+for i in environments/*py ; do
+	./tests.sh $i
+done
