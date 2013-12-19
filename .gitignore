@@ -1,0 +1,4 @@
+fuel-main
+*.pyc
+.bmtestsrc
+logs/*

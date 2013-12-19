@@ -1,0 +1,66 @@
+#!/bin/bash
+res1=`date +%s`
+URL="$1"
+
+if [ -f ./.bmtestsrc ] ; then
+	. ./.bmtestsrc
+fi
+if [ "$BMTEST_BASE" == "" ] ; then
+	BASE='/home/jenkins'
+else
+	BASE="$BMTEST_BASE"
+fi
+
+if [ "$URL" == "" ] ; then
+        echo "Please provide ISO URL or ISO path/file as argument"
+        exit 1
+fi
+
+# Run our scripts
+if [ -f "$URL" ] ; then
+	echo "$URL ISO file found. Using it."
+	ISO="$URL"
+else
+	echo "Downloading $URL"
+	ISO=`$BASE/download_iso.sh "$URL"`
+fi
+
+echo "Preparing PXE and rebooting Fuel master node"
+$BASE/setup_pxe_for_iso.sh "$ISO" &>/dev/null && \
+$BASE/deploy_fuel_master_node.sh
+
+sleep 10
+
+master_ip=`grep -o "ip=[[:digit:]]\+\.[[:digit:]]\+\.[[:digit:]]\+\.[[:digit:]]\+" $BASE/pxelinux.bootpxe | cut -d= -f2`
+
+RESULT="TIMEOUT"
+ECODE=1
+
+echo "Waiting for Fuel master node to come up "
+for i in {1..60} ; do
+  if curl --connect-timeout 3 -s -X GET -H "Content-Type: application/json" $master_ip:8000/api/version | grep 'release' &>/dev/null ; then
+    RESULT="DEPLOYED"
+    ECODE=0
+    break
+  else
+    echo -n "."
+    sleep 30
+  fi
+done
+echo " $RESULT"
+res2=`date +%s`
+
+dt=$(echo "$res2 - $res1" | bc)
+dd=$(echo "$dt/86400" | bc)
+dt2=$(echo "$dt-86400*$dd" | bc)
+dh=$(echo "$dt2/3600" | bc)
+dt3=$(echo "$dt2-3600*$dh" | bc)
+dm=$(echo "$dt3/60" | bc)
+ds=$(echo "$dt3-60*$dm" | bc)
+#printf "Total runtime: %d:%02d:%02d:%02.4f\n" $dd $dh $dm $ds
+printf "Total runtime: %02d:%02d:%02d\n" $dh $dm $ds
+if [ "$ECODE" == "0" ] ; then
+	echo "Rebooting future OpenStack nodes"
+	$BASE/reboot_nodes.sh y
+fi
+exit $ECODE
