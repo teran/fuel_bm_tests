@@ -68,10 +68,11 @@ case "$HOW" in
 		;;
 	*)
 		mkdir -p $MNT || exit 1
-		mount -o loop $ISO $MNT
 		if [[ $EUID -eq 0 ]]; then
+			mount -o loop $ISO $MNT
 			su -s /bin/bash $USER -c "rsync -a $MNT/ $TFTP_BASE/"
 		else
+			sudo mount -o loop $ISO $MNT
 			rsync -a $MNT/ $TFTP_BASE/
 		fi
 		umount $MNT
