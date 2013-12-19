@@ -3,6 +3,10 @@ ISO="$1"
 HOW="$2"
 MNT='/tmp/fuel_auto_iso_tmp'
 
+if [ -f ~/.bmtestsrc ] ; then
+	. ~/.bmtestsrc
+fi
+
 if [ "$BMTEST_BASE" == "" ] ; then
 	BASE='/home/jenkins/fuel_bm_tests'
 else

@@ -1,5 +1,9 @@
 #!/bin/bash
 
+if [ -f ~/.bmtestsrc ] ; then
+	. ~/.bmtestsrc
+fi
+
 if [ "$BMTEST_BASE" == "" ] ; then
 	BASE='/home/jenkins/fuel_bm_tests'
 else
