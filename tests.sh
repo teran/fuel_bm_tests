@@ -8,6 +8,8 @@ export PYTHONPATH="$BMTEST_BASE/pylibs"
 PYTHON_BIN="/usr/bin/python"
 FUEL_MASTER_NODE="192.168.128.10"
 
+echo "PYTHONPATH=$PYTHONPATH"
+
 if [ "$BMTEST_OSNODES_IPMI_IPS" == "" ] ; then
 	TOTAL_OS_NODES=4
 else
