@@ -2,9 +2,10 @@
 res1=`date +%s`
 URL="$1"
 
-if [ -f ./.bmtestsrc ] ; then
-	. ./.bmtestsrc
+if [ -f ~/.bmtestsrc ] ; then
+	. ~/.bmtestsrc
 fi
+
 if [ "$BMTEST_BASE" == "" ] ; then
 	BASE='/home/jenkins'
 else
@@ -15,6 +16,8 @@ if [ "$URL" == "" ] ; then
         echo "Please provide ISO URL or ISO path/file as argument"
         exit 1
 fi
+
+exit 0
 
 # Run our scripts
 if [ -f "$URL" ] ; then
