@@ -46,6 +46,9 @@ if ! [ -f "$ISO" ] ; then
 	exit 1
 fi
 
+find "$TFTP_BASE" -type f | xargs -P 1 -L 1 chmod 644
+find "$TFTP_BASE" -type d | xargs -P 1 -L 1 chmod 755
+
 if [[ $EUID -eq 0 ]]; then
 	su -s /bin/bash $USER -c "rm -rf $TFTP_BASE/*"
 	su -s /bin/bash $USER -c "rm -rf $TFTP_BASE/.??*"
