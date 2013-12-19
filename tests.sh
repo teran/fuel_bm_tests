@@ -49,6 +49,12 @@ for arg in "$@" ; do
 	LOG="$LOGDIR/bmtest.out"
 	mkdir -p "$LOGDIR"
 	curl -s http://$FUEL_MASTER_NODE:8000/api/version > "$LOGDIR/fuel.version"
+
+	if ! grep -q 'release' "$LOGDIR/fuel.version" ; then
+		echo "ERROR: No release found via http://$FUEL_MASTER_NODE:8000/api/version"
+		exit 1
+	fi
+		
 	# run tests
 	$PYTHON_BIN run_tests.py $ARGS $FUEL_MASTER_NODE $env $LOG
 	SNAPSHOT="NONE"
