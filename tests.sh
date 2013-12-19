@@ -4,11 +4,11 @@ if [ -f ~/.bmtestsrc ] ; then
 	. ~/.bmtestsrc
 fi
 
-export PYTHONPATH="$BMTEST_BASE/pylibs"
+export PYTHONPATH="$BMTEST_BASE/pylibs:./environments"
 PYTHON_BIN="/usr/bin/python"
 FUEL_MASTER_NODE="192.168.128.10"
 
-echo "PYTHONPATH=$PYTHONPATH"
+#echo "PYTHONPATH=$PYTHONPATH"
 
 if [ "$BMTEST_OSNODES_IPMI_IPS" == "" ] ; then
 	TOTAL_OS_NODES=4
