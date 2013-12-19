@@ -60,8 +60,9 @@ dm=$(echo "$dt3/60" | bc)
 ds=$(echo "$dt3-60*$dm" | bc)
 #printf "Total runtime: %d:%02d:%02d:%02.4f\n" $dd $dh $dm $ds
 printf "Total runtime: %02d:%02d:%02d\n" $dh $dm $ds
-if [ "$ECODE" == "0" ] ; then
-	echo "Rebooting future OpenStack nodes"
-	$BASE/reboot_nodes.sh y
-fi
+# skip this part for now
+#if [ "$ECODE" == "0" ] ; then
+#	echo "Rebooting future OpenStack nodes"
+#	$BASE/reboot_nodes.sh y
+#fi
 exit $ECODE
