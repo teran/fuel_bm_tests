@@ -41,7 +41,7 @@ echo "Waiting for Fuel master node to come up "
 for i in {1..60} ; do
   if curl --connect-timeout 3 -s -X GET -H "Content-Type: application/json" $master_ip:8000/api/version | grep 'release' &>/dev/null ; then
     FV=`curl --connect-timeout 3 -s -X GET -H "Content-Type: application/json" $master_ip:8000/api/version`
-    RESULT="DEPLOYED ISO: `echo $ISO | grep -o 'fuel-[^/]*iso' SUCCESSFULLY`\n$FV\n"
+    RESULT="DEPLOYED ISO: `echo $ISO | grep -o 'fuel-[^/]*iso'` SUCCESSFULLY\n$FV\n"
     ECODE=0
     break
   else
