@@ -40,7 +40,8 @@ ECODE=1
 echo "Waiting for Fuel master node to come up "
 for i in {1..60} ; do
   if curl --connect-timeout 3 -s -X GET -H "Content-Type: application/json" $master_ip:8000/api/version | grep 'release' &>/dev/null ; then
-    RESULT="DEPLOYED"
+    FV=`curl --connect-timeout 3 -s -X GET -H "Content-Type: application/json" $master_ip:8000/api/version`
+    RESULT="DEPLOYED\n$FV\n"
     ECODE=0
     break
   else
@@ -48,7 +49,7 @@ for i in {1..60} ; do
     sleep 30
   fi
 done
-echo " $RESULT"
+echo -e " $RESULT"
 res2=`date +%s`
 
 dt=$(echo "$res2 - $res1" | bc)
