@@ -6,7 +6,11 @@ fi
 
 export PYTHONPATH="$BMTEST_BASE/pylibs:./environments"
 PYTHON_BIN="/usr/bin/python"
-FUEL_MASTER_NODE="192.168.128.10"
+
+FUEL_MASTER_NODE=`grep -o "ip=[[:digit:]]\+\.[[:digit:]]\+\.[[:digit:]]\+\.[[:digit:]]\+" ./pxelinux.bootpxe | cut -d= -f2`
+if [ "$?" != "0" ] ; then
+	FUEL_MASTER_NODE="192.168.128.10"
+fi
 
 #echo "PYTHONPATH=$PYTHONPATH"
 
