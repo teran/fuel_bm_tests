@@ -13,7 +13,7 @@ class environment:
         ['controller'],
         ['controller'],
         ['controller'],
-        ['compute']
+        ['compute', 'cinder']
       ]
       net_tag = {
          'management': 730,
@@ -28,6 +28,6 @@ class environment:
         "volumes_lvm": True,
         "libvirt_type": "kvm"
       }
-      ostf_should_fail = 0
+      ostf_should_fail = 8
       ostf_timeout = 6 * 60 * 60
       ostf_test_sets = ['ha', 'smoke', 'sanity', 'platform_tests']

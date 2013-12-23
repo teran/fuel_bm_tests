@@ -25,7 +25,7 @@ class environment:
 	"savanna": True,
         "libvirt_type": "kvm"
       }
-      ostf_should_fail = 0
+      ostf_should_fail = 1
       ostf_timeout = 120 * 60
       ostf_test_sets = ['smoke', 'sanity', 'platform_tests']
       

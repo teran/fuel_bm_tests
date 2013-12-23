@@ -10,9 +10,9 @@ class environment:
         'eth3': ["fuelweb_admin"]
       }
       node_roles = [
-        ['controller'],
-        ['controller'],
-        ['controller'],
+        ['controller', 'cinder'],
+        ['controller', 'cinder'],
+        ['controller', 'cinder'],
         ['compute']
       ]
       net_tag = {

@@ -13,7 +13,7 @@ class environment:
         ['controller'],
         ['controller'],
         ['controller'],
-        ['compute']
+        ['compute', 'cinder']
       ]
       net_tag = {
          'management': 730,
@@ -29,6 +29,6 @@ class environment:
         "neutron_vlan_range": [ 1000, 1009 ],
         "libvirt_type": "kvm"
       }
-      ostf_should_fail = 0
+      ostf_should_fail = 7
       ostf_timeout = 6 * 60 * 60
       ostf_test_sets = ['ha', 'smoke', 'sanity', 'platform_tests']
