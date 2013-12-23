@@ -153,7 +153,7 @@ def remove_env(admin_node_ip, env_name, dosnapshot=False, keepalive=False):
   if cluster_id:
     return "Can't delete cluster"
 
-  for i in range(60):
+  for i in range(180):
     cur_nodes = client.list_nodes()
     if len(cur_nodes) < len(all_nodes):
       time.sleep(10)
