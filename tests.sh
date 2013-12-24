@@ -40,11 +40,18 @@ for arg in "$@" ; do
 	else
 		env="$arg"
 	fi
+	echo
+	ts=`date +"%Y-%m-%d_%H-%M-%S"`
+	LOGDIR="./logs/${ts}_${env}"
+	LOG="$LOGDIR/bmtest.out"
+	mkdir -p "$LOGDIR"
+	curl -s http://$FUEL_MASTER_NODE:8000/api/version > "$LOGDIR/fuel.version"
 	if ! grep -q 'release' "$LOGDIR/fuel.version" ; then
 		echo "ERROR: No release found via http://$FUEL_MASTER_NODE:8000/api/version"
 		exit 1
 	fi
-	echo
+
+	# run tests
 	DISCOVERED_NODES=`curl -s -X GET http://$FUEL_MASTER_NODE:8000/api/nodes | python -mjson.tool | grep discover | wc -l`
 	echo "##### Running tests for environment: $env #####"
 	if [ "$DISCOVERED_NODES" != "$TOTAL_OS_NODES" ] ; then
@@ -52,13 +59,6 @@ for arg in "$@" ; do
 		./reboot_nodes.sh y &>/dev/null
 		sleep 180
 	fi
-	ts=`date +"%Y-%m-%d_%H-%M-%S"`
-	LOGDIR="./logs/${ts}_${env}"
-	LOG="$LOGDIR/bmtest.out"
-	mkdir -p "$LOGDIR"
-	curl -s http://$FUEL_MASTER_NODE:8000/api/version > "$LOGDIR/fuel.version"
-		
-	# run tests
 	$PYTHON_BIN run_tests.py $ARGS $FUEL_MASTER_NODE $env $LOG
 	SNAPSHOT="NONE"
 	if curl -s -X GET --data '' http://$FUEL_MASTER_NODE:8000/api/tasks | grep status | grep dump | grep ready | grep 'fuel-snapshot'  &>/dev/null ; then
