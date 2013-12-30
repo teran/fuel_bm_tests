@@ -1,6 +1,6 @@
---- /srv/tftp/fuel321/ks.cfg	2013-12-10 14:38:53.266044387 +0000
-+++ /srv/tftp/ks_321.cfg	2013-12-10 14:32:13.082677779 +0000
-@@ -43,7 +43,8 @@
+--- fuel_bmtests/ks.cfg	2013-12-26 20:43:44.000000000 +0000
++++ ks_bmtests.cfg	2013-12-30 15:15:39.743992823 +0000
+@@ -48,7 +48,8 @@
          echo
          echo "Possible choices: ${drives}"
          echo
@@ -10,7 +10,7 @@
      done
      clear
      chvt 1
-@@ -187,6 +188,10 @@
+@@ -214,6 +215,10 @@
      fi
  }
  
@@ -21,16 +21,20 @@
  # Default FQDN
  hostname="nailgun.mirantis.com"
  
-@@ -278,6 +283,8 @@
+@@ -305,6 +310,12 @@
  chmod 0777 /usr/local/sbin/bootstrap_admin_node.sh
  cp ${SOURCE}/bootstrap_admin_node.conf /etc/init/bootstrap_admin_node.conf
  echo "ENABLED=1" > /etc/sysconfig/bootstrap_admin_node
-+# Dirty hack for bare-metal automation
++# Dirty hacks for bare-metal automation
 +sed -e 's#iface=eth0#iface=eth3#' -i /usr/local/sbin/bootstrap_admin_node.sh
++cat > /usr/local/sbin/anaconda_lvm_bug_hack.sh << EOF
++echo -e "#raw\nwhile : ; do\n\tegrep -q 'CRITICAL: anaconda .* exception report' /tmp/anaconda.log && egrep -q 'LVMError: lvactivate failed' /tmp/anaconda.log && reboot ;\n\tsleep 10;\ndone &\n#end raw"
++sed -e "s#\$SNIPPET('pre_install_network_config')#\$SNIPPET('pre_install_network_config')\n\n\$SNIPPET('anaconda_lvm_bug_workaround')#" -i /var/lib/cobbler/kickstarts/centos-x86_64.ks
++EOF
  
  # Copying version.yaml file. It contains COMMIT_SHA of last commit.
  mkdir -p /etc/nailgun
-@@ -311,6 +318,8 @@
+@@ -338,6 +349,8 @@
  EOF
  
  echo "sed -i \"s%\(^.*able on:\).*$%\1 http://\`ip address show eth0 | awk '/inet / {print \$2}' | cut -d/ -f1 -\`:8000%\" /etc/issue" >>/etc/rc.local
@@ -39,3 +43,10 @@
  
  # Unmounting source
  umount -f ${SOURCE}
+@@ -374,4 +387,4 @@
+ # Blacklist i2c_piix4 module for VirtualBox so it does not create kernel errors
+ [[ $(virt-what) = "virtualbox" ]] && echo "blacklist i2c_piix4" > /etc/modprobe.d/blacklist-i2c-piix4.conf
+ 
+-%end
+\ No newline at end of file
++%end
