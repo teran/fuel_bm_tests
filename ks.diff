@@ -29,7 +29,7 @@
 +sed -e 's#iface=eth0#iface=eth3#' -i /usr/local/sbin/bootstrap_admin_node.sh
 +cat > /usr/local/sbin/anaconda_lvm_bug_hack.sh << EOF
 +echo -e "#raw\nwhile : ; do\n\tegrep -q 'CRITICAL: anaconda .* exception report' /tmp/anaconda.log && egrep -q 'LVMError: lvactivate failed' /tmp/anaconda.log && reboot ;\n\tsleep 10;\ndone &\n#end raw" > /var/lib/cobbler/snippets/anaconda_lvm_bug_workaround
-+sed -e "s#('pre_install_network_config')#('pre_install_network_config')\n\n\$SNIPPET('anaconda_lvm_bug_workaround')#" -i /var/lib/cobbler/kickstarts/centos-x86_64.ks
++sed -e "s#('pre_install_network_config')#('pre_install_network_config')\n\n\\\$SNIPPET('anaconda_lvm_bug_workaround')#" -i /var/lib/cobbler/kickstarts/centos-x86_64.ks
 +EOF
  
  # Copying version.yaml file. It contains COMMIT_SHA of last commit.
