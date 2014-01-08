@@ -26,6 +26,7 @@ if [[ $EUID -eq 0 ]]; then
 fi
 
 ARGS=""
+rm -f ./RESULT.txt
 for arg in "$@" ; do
 	if [ "$arg" == "keep-env" ] || [ "$arg" == "keep_env" ]; then
 		ARGS="$ARGS -k"
@@ -54,12 +55,14 @@ for arg in "$@" ; do
 	# run tests
 	DISCOVERED_NODES=`curl -s -X GET http://$FUEL_MASTER_NODE:8000/api/nodes | python -mjson.tool | grep discover | wc -l`
 	echo "##### Running tests for environment: $env #####"
+	echo "##### Running tests for environment: $env #####" >> ./RESULT.txt
 	if [ "$DISCOVERED_NODES" != "$TOTAL_OS_NODES" ] ; then
 		echo "Discovered nodes: $DISCOVERED_NODES, but should be $TOTAL_OS_NODES. Rebooting nodes."
 		./reboot_nodes.sh y &>/dev/null
 		sleep 180
 	fi
 	$PYTHON_BIN run_tests.py $ARGS $FUEL_MASTER_NODE $env $LOG
+	cat $LOG >> ./RESULT.txt
 	SNAPSHOT="NONE"
 	if curl -s -X GET --data '' http://$FUEL_MASTER_NODE:8000/api/tasks | grep status | grep dump | grep ready | grep 'fuel-snapshot'  &>/dev/null ; then
 		URI=`curl -s -X GET --data '' http://$FUEL_MASTER_NODE:8000/api/tasks | grep status | grep dump | grep ready | grep -o '/dump/fuel-snapshot.*tgz'`
@@ -78,7 +81,10 @@ for arg in "$@" ; do
 			rm -rf localhost/var/log/remote/node-*
 			mv tmplogs/node-* localhost/var/log/remote/
 			rm -rf tmplogs
+			egrep 'crit:|raise LVMError' localhost/var/log/remote/node-*/install/anaconda.log > anaconda.log
 		popd &>/dev/null
+
+		mv $LOGDIR/$SNAPDIR/anaconda.log ./anaconda.log
 
 		pushd $LOGDIR &>/dev/null
 			rm -f $SNAPSHOT snapshot.tgz
