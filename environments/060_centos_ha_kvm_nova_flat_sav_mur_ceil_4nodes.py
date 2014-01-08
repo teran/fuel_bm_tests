@@ -28,6 +28,6 @@ class environment:
         "volumes_lvm": True,
         "libvirt_type": "kvm"
       }
-      ostf_should_fail = 11
+      ostf_should_fail = 10
       ostf_timeout = 6 * 60 * 60
       ostf_test_sets = ['ha', 'smoke', 'sanity', 'platform_tests']
