@@ -84,7 +84,7 @@ for arg in "$@" ; do
 			egrep 'crit:|raise LVMError' localhost/var/log/remote/node-*/install/anaconda.log > anaconda.log &>/dev/null
 		popd &>/dev/null
 
-		mv $LOGDIR/$SNAPDIR/anaconda.log ./anaconda.log &>/dev/null
+		mv $LOGDIR/$SNAPDIR/anaconda.log ./${ts}_${env}.anaconda.log &>/dev/null
 
 		pushd $LOGDIR &>/dev/null
 			rm -f $SNAPSHOT snapshot.tgz
