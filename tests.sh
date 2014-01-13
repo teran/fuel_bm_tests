@@ -81,7 +81,7 @@ for arg in "$@" ; do
 			rm -rf localhost/var/log/remote/node-*
 			mv tmplogs/node-* localhost/var/log/remote/
 			rm -rf tmplogs
-			egrep 'crit:|raise LVMError' localhost/var/log/remote/node-*/install/anaconda.log > anaconda.log &>/dev/null
+			egrep 'crit:|raise LVMError' localhost/var/log/remote/node-*/install/anaconda.log > anaconda.log
 		popd &>/dev/null
 
 		mv $LOGDIR/$SNAPDIR/anaconda.log ./${ts}_${env}.anaconda.log &>/dev/null
