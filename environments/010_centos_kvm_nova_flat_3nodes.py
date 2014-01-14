@@ -22,7 +22,6 @@ class environment:
       }
       deploy_timeout = 120 * 60
       settings = {
-        "murano": True,
         "volumes_lvm": True,
         "libvirt_type": "kvm"
       }
