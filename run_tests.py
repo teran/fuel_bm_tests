@@ -230,31 +230,38 @@ def setup_env(admin_node_ip, env_name):
   # get all nodes
   for i in range(18):
     all_nodes = client.list_nodes()
-    if len(all_nodes) < len(env.node_roles):
+    if len(all_nodes) < len(env.node_roles) + len(env.special_roles):
       time.sleep(10)
 
-  # check if we have anough nodes for our test case
-  if len(all_nodes) < len(env.node_roles):
+  # check if we have enough nodes for our test case
+  if len(all_nodes) < len(env.node_roles) + len(env.special_roles):
     return "Not enough nodes"
 
   nodes_data = []
   node_local_id = 0
 
   for node in all_nodes:
-    if node_local_id < len(env.node_roles):
-      #print "Found node id: {}".format(node['id'])
+    if node['cluster'] != None and (node_local_id < len(env.node_roles) or node['mac'] in env.special_roles):
+      if node['mac'] in env.special_roles:
+        node_role = env.special_roles['mac']
+      else:
+        node_role = env.node_roles[node_local_id]
+        node_local_id += 1
       node_data = {
-        'cluster_id': cluster_id,
+        'cluster': cluster_id,
         'id': node['id'],
         'pending_addition': "true",
-        'pending_roles': env.node_roles[node_local_id]
+        'pending_roles': node_role
       }
       nodes_data.append(node_data)
-      node_local_id += 1
+
+  # check if we assigned all nodes we wanted to
+  cluster_nodes = client.list_cluster_nodes(cluster_id)
+  if len(cluster_nodes) != len(env.node_roles) + len(env.special_roles):
+    return "Not enough nodes"
 
   # add nodes to cluster
   client.update_nodes(nodes_data)
-  cluster_nodes = client.list_cluster_nodes(cluster_id)
   for node in cluster_nodes:
     node_id = node['id']
     interfaces_dict = env.interfaces

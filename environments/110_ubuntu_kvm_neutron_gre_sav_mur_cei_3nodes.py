@@ -9,6 +9,7 @@ class environment:
         'eth2': ["storage", "management"],
         'eth3': ["fuelweb_admin"]
       }
+      special_roles = {}
       node_roles = [
         ['controller'],
         ['cinder'],
