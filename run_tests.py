@@ -241,27 +241,28 @@ def setup_env(admin_node_ip, env_name):
   node_local_id = 0
 
   for node in all_nodes:
-    if node['cluster'] != None and (node_local_id < len(env.node_roles) or node['mac'] in env.special_roles):
+    if node['cluster'] == None and (node_local_id < len(env.node_roles) or node['mac'] in env.special_roles):
       if node['mac'] in env.special_roles:
         node_role = env.special_roles['mac']
       else:
         node_role = env.node_roles[node_local_id]
         node_local_id += 1
       node_data = {
-        'cluster': cluster_id,
+        'cluster_id': cluster_id,
         'id': node['id'],
         'pending_addition': "true",
         'pending_roles': node_role
       }
       nodes_data.append(node_data)
 
+  # add nodes to cluster
+  client.update_nodes(nodes_data)
+
   # check if we assigned all nodes we wanted to
   cluster_nodes = client.list_cluster_nodes(cluster_id)
   if len(cluster_nodes) != len(env.node_roles) + len(env.special_roles):
     return "Not enough nodes"
 
-  # add nodes to cluster
-  client.update_nodes(nodes_data)
   for node in cluster_nodes:
     node_id = node['id']
     interfaces_dict = env.interfaces
