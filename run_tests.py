@@ -134,7 +134,7 @@ def remove_env(admin_node_ip, env_name, dosnapshot=False, keepalive=False):
   if cluster_id:
     if dosnapshot:
       task = client.generate_logs()
-      result = task_wait(client, task, 120, 10)
+      result = task_wait(client, task, 600, 10)
     if keepalive:
       return "OK - Keep alive is enabled, keeping env alive"
     cluster_nodes = client.list_cluster_nodes(cluster_id)
