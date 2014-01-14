@@ -26,7 +26,9 @@ if [[ $EUID -eq 0 ]]; then
 fi
 
 ARGS=""
-rm -f ./RESULT.txt
+HTML_REP=""
+rm -f ./RESULT.txt ./RESULT.html
+
 for arg in "$@" ; do
 	if [ "$arg" == "keep-env" ] || [ "$arg" == "keep_env" ]; then
 		ARGS="$ARGS -k"
@@ -36,6 +38,11 @@ for arg in "$@" ; do
 		ARGS="$ARGS -c"
 		continue
 	fi
+	if [ "$arg" == "html-report" ] || [ "$arg" == "html_report" ]; then
+		HTML_REP="yes"
+		continue
+	fi
+
 	if [ -f "$arg" ] ; then
 		env=`basename $arg | sed -e 's#\.py$##'`
 	else
@@ -44,6 +51,7 @@ for arg in "$@" ; do
 	echo
 	ts=`date +"%Y-%m-%d_%H-%M-%S"`
 	LOGDIR="./logs/${ts}_${env}"
+        env_name="${ts}_${env}"
 	LOG="$LOGDIR/bmtest.out"
 	mkdir -p "$LOGDIR"
 	curl -s http://$FUEL_MASTER_NODE:8000/api/version > "$LOGDIR/fuel.version"
@@ -91,5 +99,30 @@ for arg in "$@" ; do
 			tar czf $SNAPSHOT $SNAPDIR
 			rm -rf ./$SNAPDIR
 		popd &>/dev/null
+	fi
+	if [ ! -z "$HTML_REP" ] ; then
+		HTML="$LOG.html"
+		grep -q 'ERROR' $LOG && RES="<font color=red>FAILED</font>" || RES="<font color=green>PASSED</font>"
+		
+		cat <<EOF > $HTML
+		$env_name - <a href="#" onclick="document.getElementById('${env_name}_div').style.display=(document.getElementById('${env_name}_div').style.display=='block')?'none':'block';">$RES</a>
+		<div id='${env_name}_div' style='display:none;background-color:#F2F2F2;border:1px solid black;width:80%;margin:1%;'>
+EOF
+		
+		sed -e 's#OK#<font color="green">OK</font>#g' \
+		-e 's#ERROR#<font color="red">ERROR</font>#g' \
+		-e 's#$#<br>#' \
+		-e 's#\t#\&nbsp;\&nbsp;\&nbsp;\&nbsp;\&nbsp;\&nbsp;#' \
+		$LOG >> $HTML
+		
+		cat <<EOF >> $HTML
+		<a href="#" onclick="document.getElementById('${env_name}_ostf_div').style.display=(document.getElementById('${env_name}_ostf_div').style.display=='block')?'none':'block';">Show/Hide OSTF results</a>
+EOF
+		
+		OSTF=`sed -e 's#$#<br>#' -e 's#success#<font color="green">success</font>#g' -e 's#failure#<font color="red">failure</font>#g' -e 's#\t#\&nbsp;\&nbsp;\&nbsp;\&nbsp;\&nbsp;\&nbsp;#' ${LOG}.ostf`
+		echo "<div id='${env_name}_ostf_div' style='display:none;background-color:#FBFBFB;border:1px solid black;width:80%;margin:1%;'>" >> $HTML
+		echo "$OSTF</div></div>" >> $HTML
+		cat $HTML >> ./RESULT.html
+		echo '<br>' >> ./RESULT.html
 	fi
 done
