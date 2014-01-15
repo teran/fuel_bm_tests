@@ -114,7 +114,10 @@ EOF
 		-e 's#$#<br>#' \
 		-e 's#\t#\&nbsp;\&nbsp;\&nbsp;\&nbsp;\&nbsp;\&nbsp;#' \
 		$LOG >> $HTML
-		
+
+		# Add results zip download link
+		sed -e "s#<br># - <a href='$env_name.zip'>Download results</a><br>#" -i $HTML
+
 		cat <<EOF >> $HTML
 		<a href="#" onclick="document.getElementById('${env_name}_ostf_div').style.display=(document.getElementById('${env_name}_ostf_div').style.display=='block')?'none':'block';">Show/Hide OSTF results</a>
 EOF

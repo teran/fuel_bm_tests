@@ -1,4 +1,5 @@
 fuel-main
 *.pyc
 .bmtestsrc
+.idea
 logs/*
