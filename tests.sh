@@ -104,10 +104,10 @@ for arg in "$@" ; do
 		HTML="$LOG.html"
 		grep -q 'ERROR' $LOG && RES="<font color=red>FAILED</font>" || RES="<font color=green>PASSED</font>"
 		# Add results zip download link
-		ZIP="<a href='$env_name.zip'>Download results</a><br>#"
+		ZIP="<a href='$env_name.zip'>Download results</a>"
 		
 		cat <<EOF > $HTML
-		$env_name - <a href="#" onclick="document.getElementById('${env_name}_div').style.display=(document.getElementById('${env_name}_div').style.display=='block')?'none':'block';">$RES</a> - $ZIP
+		$env_name - <a href="#" onclick="document.getElementById('${env_name}_div').style.display=(document.getElementById('${env_name}_div').style.display=='block')?'none':'block';">$RES</a> - $ZIP<br>
 		<div id='${env_name}_div' style='display:none;background-color:#F2F2F2;border:1px solid black;width:80%;margin:1%;'>
 EOF
 		
