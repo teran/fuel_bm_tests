@@ -47,15 +47,18 @@ def setup_logger(logger_name, log_file, level=logging.INFO, logformat='%(asctime
 ###################################
 def ostf_run(log, client, cluster_id, test_sets=None, should_fail=0, timeout=10 * 60):
 
+  # define default test_sets if not provided by the environment
   test_sets = test_sets \
     if test_sets is not None \
     else ['smoke', 'sanity']
 
+  # run ostf
   try:
     client.ostf_run_tests(cluster_id, test_sets)
   except:
     return "ERROR - OSTF Server is not available"
 
+  # wait for ostf results
   set_result_list = ostf_test_wait(client, cluster_id, timeout)
   passed = 0
   failed = 0
@@ -64,8 +67,8 @@ def ostf_run(log, client, cluster_id, test_sets=None, should_fail=0, timeout=10 
   ostflog = logging.getLogger('ostflog')
   ostflog.propagate = False
 
+  # analyze ostf results and write details to ostf log
   for set_result in set_result_list:
-
     for testik in  set_result['tests']:
       ostflog.info('[%s] %s: %s', testik['testset'], testik['name'], testik['status'])
 
@@ -85,6 +88,8 @@ def ostf_run(log, client, cluster_id, test_sets=None, should_fail=0, timeout=10 
                     set_result['tests']
                 )
     )
+
+  # prepare result
   if failed <= should_fail:
     result = "OK\n"
     result += "\tPassed tests: %s\n" % passed
@@ -145,14 +150,17 @@ def remove_env(admin_node_ip, env_name, dosnapshot=False, keepalive=False):
   else:
     return "OK"
 
+  # wait for cluster to disappear
   for i in range(12):
     cluster_id = client.get_cluster_id(env_name)
     if cluster_id:
       time.sleep(5)
 
+  # fail if cluster is still around
   if cluster_id:
     return "Can't delete cluster"
 
+  # wait for removed nodes to come back online
   for i in range(180):
     cur_nodes = client.list_nodes()
     if len(cur_nodes) < len(all_nodes):
@@ -182,7 +190,7 @@ def setup_env(admin_node_ip, env_name):
   if cluster_id:
     return "Can't delete cluster"
 
-  # old cluster is gone so we're ok to create a new cluster for tests
+  # old cluster is gone so we're ok to create a new cluster
   env = load_env(env_name)
   data = env.data
 
@@ -198,7 +206,7 @@ def setup_env(admin_node_ip, env_name):
   time.sleep(5)
   cluster_id = client.get_cluster_id(env_name)
 
-  # configure network
+  # configure networks
   network_list = client.get_networks(cluster_id)['networks']
   for network in network_list:
     if network["name"] in env.net_tag:
@@ -211,7 +219,7 @@ def setup_env(admin_node_ip, env_name):
       network_conf['neutron_parameters']['L2']['phys_nets']['physnet2']['vlan_range'] = env.settings['neutron_vlan_range']
       client.update_network(cluster_id, networks=network_conf, all_set=True)
 
-  # configure attributes
+  # configure cluster attributes
   attributes = client.get_cluster_attributes(cluster_id)
   for option in env.settings:
     section = False
@@ -240,6 +248,7 @@ def setup_env(admin_node_ip, env_name):
   nodes_data = []
   node_local_id = 0
 
+  # go through unassigned nodes and update their pending_roles according to environment settings
   for node in all_nodes:
     if node['cluster'] == None and (node_local_id < len(env.node_roles) or node['mac'] in env.special_roles):
       if node['mac'] in env.special_roles:
@@ -263,6 +272,7 @@ def setup_env(admin_node_ip, env_name):
   if len(cluster_nodes) != len(env.node_roles) + len(env.special_roles):
     return "Not enough nodes"
 
+  # move networks to appropriate nodes interfaces (according to environment settings)
   for node in cluster_nodes:
     node_id = node['id']
     interfaces_dict = env.interfaces
@@ -321,8 +331,6 @@ def run_ostf(admin_node_ip, env_name, log):
 
 ###################################
 def deploy_cluster(admin_node_ip, env_name):
-#  time.sleep(60)
-#  return "OK"
   client = NailgunClient(admin_node_ip)
   cluster_id = client.get_cluster_id(env_name)
   env = load_env(env_name)
@@ -343,12 +351,9 @@ def main():
       parser.add_argument("log", type=str, help="Log to store results in")
       parser.add_argument("-k", "--keep-env", help="Don't terminate OpenStack environment after deployment", action="store_true")
       parser.add_argument("-c", "--create-only", help="Create OpenStack environment and do not deploy it", action="store_true")
-
       args = parser.parse_args()
       admin_ip = args.fuel_node
       env = args.environment[:49]
-
-      # args.keep_env = bool
 
       # Create mainlog
       setup_logger('mainlog', args.log, logging.INFO, '%(asctime)s : %(message)s', '%(message)s', True)
