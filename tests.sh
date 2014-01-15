@@ -104,7 +104,7 @@ for arg in "$@" ; do
 		HTML="$LOG.html"
 		grep -q 'ERROR' $LOG && RES="<font color=red>FAILED</font>" || RES="<font color=green>PASSED</font>"
 		# Add results zip download link
-		ZIP="<a href='$env_name.zip'>Download results</a>"
+		ZIP="<a href='http://$JENKINS_BUILD_URL/artifact/artifacts/$env_name.zip'>Download results</a>"
 		
 		cat <<EOF > $HTML
 		$env_name - <a href="#" onclick="document.getElementById('${env_name}_div').style.display=(document.getElementById('${env_name}_div').style.display=='block')?'none':'block';">$RES</a> - $ZIP<br>
@@ -117,7 +117,6 @@ EOF
 		-e 's#\t#\&nbsp;\&nbsp;\&nbsp;\&nbsp;\&nbsp;\&nbsp;#' \
 		$LOG >> $HTML
 
-
 		cat <<EOF >> $HTML
 		<a href="#" onclick="document.getElementById('${env_name}_ostf_div').style.display=(document.getElementById('${env_name}_ostf_div').style.display=='block')?'none':'block';">Show/Hide OSTF results</a>
 EOF
@@ -128,4 +127,6 @@ EOF
 		cat $HTML >> ./RESULT.html
 		echo '<br>' >> ./RESULT.html
 	fi
+	grep -q 'ERROR' $LOG && PT_RES="FAILED" || PT_RES="PASSED"
+	echo "$env_name - $PT_RES" >> ./SUMMARY.txt
 done
