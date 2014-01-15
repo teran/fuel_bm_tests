@@ -5,6 +5,7 @@ import time
 import logging
 import re
 import argparse
+from ipaddr import IPNetwork
 from fuelweb_test.models.nailgun_client import NailgunClient
 
 ###################################
@@ -43,6 +44,19 @@ def setup_logger(logger_name, log_file, level=logging.INFO, logformat='%(asctime
      streamHandler = logging.StreamHandler(sys.stdout)
      streamHandler.setFormatter(stdoutfomratter)
      l.addHandler(streamHandler)
+###################################
+def get_range(ip_network, ip_range=0):
+   net = list(IPNetwork(ip_network))
+   half = len(net)/2
+   if ip_range == 0:
+     return [[str(net[2]), str(net[-2])]]
+   elif ip_range == 1:
+     return [[str(net[half]), str(net[-2])]]
+   elif ip_range == -1:
+     return [[str(net[2]), str(net[half - 1])]]
+   elif ip_range == 2:
+     # for neutron vlan
+     return [str(net[half]), str(net[-2])]
 
 ###################################
 def ostf_run(log, client, cluster_id, test_sets=None, should_fail=0, timeout=10 * 60):
@@ -151,10 +165,10 @@ def remove_env(admin_node_ip, env_name, dosnapshot=False, keepalive=False):
     return "OK"
 
   # wait for cluster to disappear
-  for i in range(12):
+  for i in range(60):
     cluster_id = client.get_cluster_id(env_name)
     if cluster_id:
-      time.sleep(5)
+      time.sleep(10)
 
   # fail if cluster is still around
   if cluster_id:
@@ -209,14 +223,51 @@ def setup_env(admin_node_ip, env_name):
   # configure networks
   network_list = client.get_networks(cluster_id)['networks']
   for network in network_list:
+    # set vlan tags
     if network["name"] in env.net_tag:
       network['vlan_start'] = env.net_tag[network["name"]]
+    # set CIDR and related net stuff
+    if network["name"] in env.net_cidr:
+      network['cidr'] = env.net_cidr[network["name"]]
+      if network["name"] == "public":
+        if env.gateway:
+          network["gateway"] = env.gateway
+        else:
+          network["gateway"] = str(list(IPNetwork(network['cidr']))[1])
+      if network["name"] in env.net_ip_ranges:
+        network['ip_ranges'] = env.net_ip_ranges[network["name"]]
+      else:
+        if network["name"] == "public":
+          network['ip_ranges'] = get_range(network['cidr'], -1)
+        elif network["name"] == "floating":
+          network['ip_ranges'] = get_range(network['cidr'], 1)
+        else:
+          network['ip_ranges'] = get_range(network['cidr'], 0)
+      network['netmask'] = str(IPNetwork(network['cidr']).netmask)
+      network['network_size'] = len(list(IPNetwork((network['cidr']))))
+
   client.update_network(cluster_id, networks=network_list)
 
+  # update neutron settings
   if "net_provider" in env.settings:
-    if env.settings["net_provider"] == 'neutron' and env.settings["net_segment_type"] == 'vlan' and 'neutron_vlan_range' in env.settings:
+    if env.settings["net_provider"] == 'neutron':
       network_conf = client.get_networks(cluster_id)
-      network_conf['neutron_parameters']['L2']['phys_nets']['physnet2']['vlan_range'] = env.settings['neutron_vlan_range']
+      # check if we need to set vlan tags
+      if env.settings["net_segment_type"] == 'vlan' and 'neutron_vlan_range' in env.settings:
+        network_conf['neutron_parameters']['L2']['phys_nets']['physnet2']['vlan_range'] = env.settings['neutron_vlan_range']
+      if 'net04' in env.net_cidr:
+        network_conf['neutron_parameters']['predefined_networks']['net04']['L3']['cidr'] = env.net_cidr['net04']
+        network_conf['neutron_parameters']['predefined_networks']['net04']['L3']['gateway'] = str(list(IPNetwork(env.net_cidr['net04']))[1])
+      if 'public' in env.net_cidr:
+        network_conf['neutron_parameters']['predefined_networks']['net04_ext']['L3']['cidr'] = env.net_cidr['public']
+        if env.gateway:
+          network_conf['neutron_parameters']['predefined_networks']['net04_ext']['L3']['gateway'] = env.gateway
+        else:
+          network_conf['neutron_parameters']['predefined_networks']['net04_ext']['L3']['gateway'] = str(list(IPNetwork(env.net_cidr['public']))[1])
+        if 'net04_ext' in env.net_ip_ranges:
+          network_conf['neutron_parameters']['predefined_networks']['net04_ext']['L3']['floating'] = env.net_ip_ranges["net04_ext"]
+        else:
+          network_conf['neutron_parameters']['predefined_networks']['net04_ext']['L3']['floating'] = get_range(env.net_cidr['public'], 2)
       client.update_network(cluster_id, networks=network_conf, all_set=True)
 
   # configure cluster attributes

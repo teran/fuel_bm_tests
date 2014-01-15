@@ -20,6 +20,7 @@ class environment:
          'storage': 732,
          'fixed': None
       }
+      net_cidr = {}
       deploy_timeout = 120 * 60
       settings = {
         "murano": True,
@@ -31,3 +32,6 @@ class environment:
       ostf_should_fail = 9
       ostf_timeout = 6 * 60 * 60
       ostf_test_sets = ['smoke', 'sanity', 'platform_tests']
+      net_cidr = {}
+      net_ip_ranges = {}
+      gateway = None

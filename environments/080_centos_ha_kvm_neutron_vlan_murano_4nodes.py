@@ -33,3 +33,6 @@ class environment:
       ostf_should_fail = 9
       ostf_timeout = 6 * 60 * 60
       ostf_test_sets = ['ha', 'smoke', 'sanity', 'platform_tests']
+      net_cidr = {}
+      net_ip_ranges = {}
+      gateway = None
