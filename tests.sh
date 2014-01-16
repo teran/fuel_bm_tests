@@ -108,10 +108,10 @@ for arg in "$@" ; do
 		
 		cat <<EOF > $HTML
 		<a href="#" onclick="document.getElementById('${env_name}_descr_div').style.display=(document.getElementById('${env_name}_descr_div').style.display=='block')?'none':'block';">$env_name</a> - <a href="#" onclick="document.getElementById('${env_name}_div').style.display=(document.getElementById('${env_name}_div').style.display=='block')?'none':'block';">$RES</a> - $ZIP<br>
-		<div id='${env_name}_descr_div' style='display:none;background-color:#FBFBF1;border:1px solid black;width:80%;margin:1%;'>
+		<div id='${env_name}_descr_div' style='display:none;background-color:#FBFBF1;border:1px solid black;width:80%;margin:1%;'><pre>
 EOF
 		cat ./environments/$env.py >> $HTML
-		echo "</div>" >> $HTML
+		echo "</pre></div>" >> $HTML
 
 		cat <<EOF >> $HTML
 		<div id='${env_name}_div' style='display:none;background-color:#F2F2F2;border:1px solid black;width:80%;margin:1%;'>
@@ -122,6 +122,16 @@ EOF
 		-e 's#$#<br>#' \
 		-e 's#\t#\&nbsp;\&nbsp;\&nbsp;\&nbsp;\&nbsp;\&nbsp;#' \
 		$LOG >> $HTML
+
+		# add anaconda to HTML report
+		if [ -s "./${ts}_${env}.anaconda.log" ] ; then
+			cat <<EOF >> $HTML
+			<a href="#" onclick="document.getElementById('${env_name}_anaconda_div').style.display=(document.getElementById('${env_name}_anaconda_div').style.display=='block')?'none':'block';">Show/Hide Anaconda errors</a><br>
+			<div id='${env_name}_anaconda_div' style='display:none;background-color:#FBF0F0;border:1px solid black;width:80%;margin:1%;'><pre>
+EOF
+			cat "./${ts}_${env}.anaconda.log" >> $HTML
+			echo "</pre></div>" >> $HTML
+		fi
 
 		cat <<EOF >> $HTML
 		<a href="#" onclick="document.getElementById('${env_name}_ostf_div').style.display=(document.getElementById('${env_name}_ostf_div').style.display=='block')?'none':'block';">Show/Hide OSTF results</a>
