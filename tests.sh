@@ -107,7 +107,13 @@ for arg in "$@" ; do
 		ZIP="<a href='${JENKINS_BUILD_URL}artifact/artifacts/$env_name.zip'>Download results</a>"
 		
 		cat <<EOF > $HTML
-		$env_name - <a href="#" onclick="document.getElementById('${env_name}_div').style.display=(document.getElementById('${env_name}_div').style.display=='block')?'none':'block';">$RES</a> - $ZIP<br>
+		<a href="#" onclick="document.getElementById('${env_name}_descr_div').style.display=(document.getElementById('${env_name}_descr_div').style.display=='block')?'none':'block';">$env_name</a> - <a href="#" onclick="document.getElementById('${env_name}_div').style.display=(document.getElementById('${env_name}_div').style.display=='block')?'none':'block';">$RES</a> - $ZIP<br>
+		<div id='${env_name}_descr_div' style='display:none;background-color:#FBFBF1;border:1px solid black;width:80%;margin:1%;'>
+EOF
+		cat ./environments/$env.py >> $HTML
+		echo "</div>" >> $HTML
+
+		cat <<EOF >> $HTML
 		<div id='${env_name}_div' style='display:none;background-color:#F2F2F2;border:1px solid black;width:80%;margin:1%;'>
 EOF
 		
