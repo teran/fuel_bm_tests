@@ -1,13 +1,13 @@
 fuel_bm_tests
 =============
 
-Requirements:
--------------
+Requirements
+------------
 * python modules: ipaddr, sys, os, re, logging, time, argparse
 * ipmitool (for bare-metal)
 
-Usage:
-------
+Usage
+-----
 * run_tests.py usage:
 
 ```bash
