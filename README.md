@@ -14,7 +14,7 @@ Usage:
 git clone https://github.com/adidenko/fuel_bm_tests
 cd fuel_bm_tests
 export PYTHONPATH="./pylibs:./environments"
- python run_tests.py --help
+python run_tests.py --help
 ```
 
 * Jenkins jobs example for bare-metal tests:
