@@ -69,7 +69,19 @@ for arg in "$@" ; do
 		./reboot_nodes.sh y &>/dev/null
 		sleep 180
 	fi
-	$PYTHON_BIN test_env.py $ARGS $FUEL_MASTER_NODE $env $LOG
+
+	# Let's rock-n-roll
+	$PYTHON_BIN manage_env.py $ARGS $FUEL_MASTER_NODE $env remove $LOG
+	$PYTHON_BIN manage_env.py $ARGS $FUEL_MASTER_NODE $env create $LOG && \
+	$PYTHON_BIN manage_env.py $ARGS $FUEL_MASTER_NODE $env netverify $LOG && \
+	$PYTHON_BIN manage_env.py $ARGS $FUEL_MASTER_NODE $env deploy $LOG && \
+	(
+		$PYTHON_BIN manage_env.py $ARGS $FUEL_MASTER_NODE $env netverify $LOG 
+		$PYTHON_BIN manage_env.py $ARGS $FUEL_MASTER_NODE $env ostf $LOG
+	)
+	$PYTHON_BIN manage_env.py $ARGS $FUEL_MASTER_NODE $env snapshot $LOG
+
+	# Now lets prepare results and reports
 	cat $LOG >> ./RESULT.txt
 	SNAPSHOT="NONE"
 	if curl -s -X GET --data '' http://$FUEL_MASTER_NODE:8000/api/tasks | grep status | grep dump | grep ready | grep 'fuel-snapshot'  &>/dev/null ; then

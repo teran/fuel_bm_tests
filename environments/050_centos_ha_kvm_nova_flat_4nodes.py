@@ -26,7 +26,7 @@ class environment:
         "volumes_lvm": True,
         "libvirt_type": "kvm"
       }
-      ostf_should_fail = 0
+      ostf_should_fail = 1
       ostf_timeout = 30 * 60
       ostf_test_sets = ['ha', 'smoke', 'sanity', 'platform_tests']
       net_cidr = {}

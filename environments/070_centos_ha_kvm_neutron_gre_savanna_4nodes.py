@@ -29,7 +29,7 @@ class environment:
         "net_segment_type": 'gre',
         "libvirt_type": "kvm"
       }
-      ostf_should_fail = 1
+      ostf_should_fail = 2
       ostf_timeout =  120 * 60
       ostf_test_sets = ['ha', 'smoke', 'sanity', 'platform_tests']
       net_cidr = {}
