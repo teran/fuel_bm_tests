@@ -50,6 +50,7 @@ for arg in "$@" ; do
 	fi
 	echo
 	ts=`date +"%Y-%m-%d_%H-%M-%S"`
+	rm -rf "./logs/${ts}_${env}"
 	LOGDIR="./logs/${ts}_${env}"
         env_name="${ts}_${env}"
 	LOG="$LOGDIR/bmtest.out"
