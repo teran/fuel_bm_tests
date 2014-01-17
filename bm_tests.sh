@@ -30,6 +30,12 @@ HTML_REP=""
 rm -f ./RESULT.txt ./RESULT.html
 
 for arg in "$@" ; do
+        if [ "$arg" == "keep-env" ] || [ "$arg" == "keep_env" ]; then
+                continue
+        fi
+        if [ "$arg" == "create-only" ] || [ "$arg" == "create_only" ]; then
+                continue
+        fi
 	if [ "$arg" == "html-report" ] || [ "$arg" == "html_report" ]; then
 		HTML_REP="yes"
 		continue
