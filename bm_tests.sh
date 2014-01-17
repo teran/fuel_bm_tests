@@ -30,14 +30,6 @@ HTML_REP=""
 rm -f ./RESULT.txt ./RESULT.html
 
 for arg in "$@" ; do
-	if [ "$arg" == "keep-env" ] || [ "$arg" == "keep_env" ]; then
-		ARGS="$ARGS -k"
-		continue
-	fi
-	if [ "$arg" == "create-only" ] || [ "$arg" == "create_only" ]; then
-		ARGS="$ARGS -c"
-		continue
-	fi
 	if [ "$arg" == "html-report" ] || [ "$arg" == "html_report" ]; then
 		HTML_REP="yes"
 		continue
@@ -72,15 +64,25 @@ for arg in "$@" ; do
 	fi
 
 	# Let's rock-n-roll
-	$PYTHON_BIN manage_env.py $ARGS $FUEL_MASTER_NODE $env remove $LOG
-	$PYTHON_BIN manage_env.py $ARGS $FUEL_MASTER_NODE $env create $LOG && \
-	$PYTHON_BIN manage_env.py $ARGS $FUEL_MASTER_NODE $env netverify $LOG && \
-	$PYTHON_BIN manage_env.py $ARGS $FUEL_MASTER_NODE $env deploy $LOG && \
-	(
-		$PYTHON_BIN manage_env.py $ARGS $FUEL_MASTER_NODE $env netverify $LOG 
-		$PYTHON_BIN manage_env.py $ARGS $FUEL_MASTER_NODE $env ostf $LOG
-	)
+	if `echo "$@" | egrep -q 'create_only|create-only'`; then
+		$PYTHON_BIN manage_env.py $ARGS $FUEL_MASTER_NODE $env remove $LOG
+		$PYTHON_BIN manage_env.py $ARGS $FUEL_MASTER_NODE $env create $LOG
+	else
+		$PYTHON_BIN manage_env.py $ARGS $FUEL_MASTER_NODE $env remove $LOG
+		$PYTHON_BIN manage_env.py $ARGS $FUEL_MASTER_NODE $env create $LOG && \
+		$PYTHON_BIN manage_env.py $ARGS $FUEL_MASTER_NODE $env netverify $LOG && \
+		$PYTHON_BIN manage_env.py $ARGS $FUEL_MASTER_NODE $env deploy $LOG && \
+		(
+			$PYTHON_BIN manage_env.py $ARGS $FUEL_MASTER_NODE $env netverify $LOG 
+			$PYTHON_BIN manage_env.py $ARGS $FUEL_MASTER_NODE $env ostf $LOG
+		)
+	fi
+
 	$PYTHON_BIN manage_env.py $ARGS $FUEL_MASTER_NODE $env snapshot $LOG
+
+	if `echo "$@" | egrep -qv 'keep_env|keep-env'`; then
+		$PYTHON_BIN manage_env.py $ARGS $FUEL_MASTER_NODE $env remove $LOG
+	fi
 
 	# Now lets prepare results and reports
 	cat $LOG >> ./RESULT.txt

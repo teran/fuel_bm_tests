@@ -477,7 +477,7 @@ def main():
   parser.add_argument("fuel_node", type=str, help="Fuel admin node IP")
   parser.add_argument('environment', type=str, help='Environment name we want to deploy and test')
   parser.add_argument('action', type=str, help="Action we want to execute. Possible actions: {}".format(supported_actions))
-  parser.add_argument("log", type=str, help="Log to store results in")
+  parser.add_argument("log", type=str, help="Logfile to store results in")
   parser.add_argument("-i", "--ignore-errors", help="Exit with 0 exit-code despite the errors we'v got", action="store_true")
 
   args = parser.parse_args()
