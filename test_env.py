@@ -17,46 +17,46 @@ def load_env(template):
 
 ###################################
 class DevopsError(Exception):
-    message = "Devops Error"
+  message = "Devops Error"
 class TimeoutError(DevopsError):
-    pass
+  pass
 
 ###################################
 def ostf_test_wait(client, cluster_id, timeout):
-   wait(
-     lambda: all([run['status'] == 'finished'
-                  for run in
-                  client.get_ostf_test_run(cluster_id)]),
-     timeout=timeout)
-   return client.get_ostf_test_run(cluster_id)
+  wait(
+    lambda: all([run['status'] == 'finished'
+                 for run in
+                 client.get_ostf_test_run(cluster_id)]),
+    timeout=timeout)
+  return client.get_ostf_test_run(cluster_id)
 
 ###################################
 def setup_logger(logger_name, log_file, level=logging.INFO, logformat='%(asctime)s : %(message)s', stdoutformat='%(message)s', stdout=False):
-   l = logging.getLogger(logger_name)
-   formatter = logging.Formatter(logformat)
-   fileHandler = logging.FileHandler(log_file, mode='w')
-   fileHandler.setFormatter(formatter)
-   l.setLevel(level)
-   l.addHandler(fileHandler)
+  l = logging.getLogger(logger_name)
+  formatter = logging.Formatter(logformat)
+  fileHandler = logging.FileHandler(log_file, mode='w')
+  fileHandler.setFormatter(formatter)
+  l.setLevel(level)
+  l.addHandler(fileHandler)
 
-   if stdout:
-     stdoutfomratter = logging.Formatter(stdoutformat)
-     streamHandler = logging.StreamHandler(sys.stdout)
-     streamHandler.setFormatter(stdoutfomratter)
-     l.addHandler(streamHandler)
+  if stdout:
+    stdoutfomratter = logging.Formatter(stdoutformat)
+    streamHandler = logging.StreamHandler(sys.stdout)
+    streamHandler.setFormatter(stdoutfomratter)
+    l.addHandler(streamHandler)
 ###################################
 def get_range(ip_network, ip_range=0):
-   net = list(IPNetwork(ip_network))
-   half = len(net)/2
-   if ip_range == 0:
-     return [[str(net[2]), str(net[-2])]]
-   elif ip_range == 1:
-     return [[str(net[half]), str(net[-2])]]
-   elif ip_range == -1:
-     return [[str(net[2]), str(net[half - 1])]]
-   elif ip_range == 2:
-     # for neutron vlan
-     return [str(net[half]), str(net[-2])]
+  net = list(IPNetwork(ip_network))
+  half = len(net)/2
+  if ip_range == 0:
+    return [[str(net[2]), str(net[-2])]]
+  elif ip_range == 1:
+    return [[str(net[half]), str(net[-2])]]
+  elif ip_range == -1:
+    return [[str(net[2]), str(net[half - 1])]]
+  elif ip_range == 2:
+    # for neutron vlan
+    return [str(net[half]), str(net[-2])]
 
 ###################################
 def ostf_run(log, client, cluster_id, test_sets=None, should_fail=0, timeout=10 * 60):
@@ -117,30 +117,20 @@ def ostf_run(log, client, cluster_id, test_sets=None, should_fail=0, timeout=10 
 
 ###################################
 def wait(predicate, interval=5, timeout=None):
-    """
-    wait(predicate, interval=5, timeout=None) - wait until predicate will 
-    become True. Returns number of seconds that is left or 0 if timeout is None.
 
-    Options:
+  start_time = time.time()
+  while not predicate():
+    if timeout and start_time + timeout < time.time():
+      raise TimeoutError("Waiting timed out")
 
-    interval - seconds between checks.
+    seconds_to_sleep = interval
+    if timeout:
+      seconds_to_sleep = max(
+          0,
+          min(seconds_to_sleep, start_time + timeout - time.time()))
+    time.sleep(seconds_to_sleep)
 
-    timeout  - raise TimeoutError if predicate won't become True after 
-    this amount of seconds. 'None' disables timeout.
-    """
-    start_time = time.time()
-    while not predicate():
-        if timeout and start_time + timeout < time.time():
-            raise TimeoutError("Waiting timed out")
-
-        seconds_to_sleep = interval
-        if timeout:
-            seconds_to_sleep = max(
-                0,
-                min(seconds_to_sleep, start_time + timeout - time.time()))
-        time.sleep(seconds_to_sleep)
-
-    return timeout + start_time - time.time() if timeout else 0
+  return timeout + start_time - time.time() if timeout else 0
 
 ###################################
 def remove_env(admin_node_ip, env_name, dosnapshot=False, keepalive=False):
@@ -255,6 +245,7 @@ def setup_env(admin_node_ip, env_name):
       # check if we need to set vlan tags
       if env.settings["net_segment_type"] == 'vlan' and 'neutron_vlan_range' in env.settings:
         network_conf['neutron_parameters']['L2']['phys_nets']['physnet2']['vlan_range'] = env.settings['neutron_vlan_range']
+      # check and update networks CIDR/netmask/size/etc
       if 'net04' in env.net_cidr:
         network_conf['neutron_parameters']['predefined_networks']['net04']['L3']['cidr'] = env.net_cidr['net04']
         network_conf['neutron_parameters']['predefined_networks']['net04']['L3']['gateway'] = str(list(IPNetwork(env.net_cidr['net04']))[1])
@@ -268,10 +259,12 @@ def setup_env(admin_node_ip, env_name):
           network_conf['neutron_parameters']['predefined_networks']['net04_ext']['L3']['floating'] = env.net_ip_ranges["net04_ext"]
         else:
           network_conf['neutron_parameters']['predefined_networks']['net04_ext']['L3']['floating'] = get_range(env.net_cidr['public'], 2)
+      # push updated network to Fuel API
       client.update_network(cluster_id, networks=network_conf, all_set=True)
 
   # configure cluster attributes
   attributes = client.get_cluster_attributes(cluster_id)
+
   for option in env.settings:
     section = False
     if option in ('savanna', 'murano', 'ceilometer'):
@@ -344,19 +337,19 @@ def setup_env(admin_node_ip, env_name):
 
 ###################################
 def task_wait(client, task, timeout, interval=5):
-        try:
-            wait(
-                lambda: client.get_task(
-                    task['id'])['status'] != 'running',
-                interval=interval,
-                timeout=timeout
-            )
-        except TimeoutError:
-            raise TimeoutError(
-                "Waiting task \"{task}\" timeout {timeout} sec "
-                "was exceeded: ".format(task=task["name"], timeout=timeout))
+  try:
+    wait(
+      lambda: client.get_task(
+        task['id'])['status'] != 'running',
+        interval=interval,
+        timeout=timeout
+    )
+  except TimeoutError:
+    raise TimeoutError(
+      "Waiting task \"{task}\" timeout {timeout} sec "
+      "was exceeded: ".format(task=task["name"], timeout=timeout))
 
-        return client.get_task(task['id'])
+  return client.get_task(task['id'])
 
 ###################################
 def verify_network(admin_node_ip, env_name):
@@ -480,4 +473,3 @@ def main():
 ###################################
 if __name__ == '__main__':
   main()
-
