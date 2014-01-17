@@ -8,13 +8,13 @@ Requirements
 
 Usage
 -----
-* run_tests.py usage:
+* test_env.py usage:
 
 ```bash
 git clone https://github.com/adidenko/fuel_bm_tests
 cd fuel_bm_tests
 export PYTHONPATH="./pylibs:./environments"
-python run_tests.py --help
+python test_env.py --help
 ```
 
 * Jenkins jobs example for bare-metal tests:
@@ -23,7 +23,7 @@ python run_tests.py --help
 export BMTEST_BASE="$WORKSPACE"
 export JENKINS_BUILD_URL="$BUILD_URL"
 rm -rf logs/* ./RESULT.txt ./RESULT.html ./*anaconda.log ./SUMMARY.txt
-./tests.sh html-report $ENVIRONMENT_NAME
+./bm_tests.sh html-report $ENVIRONMENT_NAME
 if [ -s ./*anaconda.log ] ; then
     mv ./*anaconda.log $ARTIFACTS_DIR/ || true
 fi

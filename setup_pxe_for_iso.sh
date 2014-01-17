@@ -30,6 +30,12 @@ else
 	KS_CFG="$BMTEST_KS_CFG"
 fi
 
+if [ "$BMTEST_KS_DIFF" == "" ] ; then
+	KS_DIFF="$BASE/ks.diff"
+else
+	KS_DIFF="$BMTEST_KS_DIFF"
+fi
+
 id $USER > /dev/null || exit 1
 
 if [ "$HOW" == "7z" ] ; then

@@ -69,7 +69,7 @@ for arg in "$@" ; do
 		./reboot_nodes.sh y &>/dev/null
 		sleep 180
 	fi
-	$PYTHON_BIN run_tests.py $ARGS $FUEL_MASTER_NODE $env $LOG
+	$PYTHON_BIN test_env.py $ARGS $FUEL_MASTER_NODE $env $LOG
 	cat $LOG >> ./RESULT.txt
 	SNAPSHOT="NONE"
 	if curl -s -X GET --data '' http://$FUEL_MASTER_NODE:8000/api/tasks | grep status | grep dump | grep ready | grep 'fuel-snapshot'  &>/dev/null ; then
