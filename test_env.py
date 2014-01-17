@@ -388,86 +388,86 @@ def deploy_cluster(admin_node_ip, env_name):
 
 ###################################
 def main():
-      # Parse args
-      parser = argparse.ArgumentParser(description='Deploy OpenStack and run Fuel health check.')
-      parser.add_argument("fuel_node", type=str, help="Fuel admin node IP")
-      parser.add_argument('environment', type=str, help='environment name we want to deploy and test')
-      parser.add_argument("log", type=str, help="Log to store results in")
-      parser.add_argument("-k", "--keep-env", help="Don't terminate OpenStack environment after deployment", action="store_true")
-      parser.add_argument("-c", "--create-only", help="Create OpenStack environment and do not deploy it", action="store_true")
-      args = parser.parse_args()
-      admin_ip = args.fuel_node
-      env = args.environment[:49]
+  # Parse args
+  parser = argparse.ArgumentParser(description='Deploy OpenStack and run Fuel health check.')
+  parser.add_argument("fuel_node", type=str, help="Fuel admin node IP")
+  parser.add_argument('environment', type=str, help='environment name we want to deploy and test')
+  parser.add_argument("log", type=str, help="Log to store results in")
+  parser.add_argument("-k", "--keep-env", help="Don't terminate OpenStack environment after deployment", action="store_true")
+  parser.add_argument("-c", "--create-only", help="Create OpenStack environment and do not deploy it", action="store_true")
+  args = parser.parse_args()
+  admin_ip = args.fuel_node
+  env = args.environment[:49]
 
-      # Create mainlog
-      setup_logger('mainlog', args.log, logging.INFO, '%(asctime)s : %(message)s', '%(message)s', True)
-      mainlog = logging.getLogger('mainlog')
-      mainlog.propagate = False
+  # Create mainlog
+  setup_logger('mainlog', args.log, logging.INFO, '%(asctime)s : %(message)s', '%(message)s', True)
+  mainlog = logging.getLogger('mainlog')
+  mainlog.propagate = False
 
-      # Removing env in case it exists
-      remove_result = remove_env(admin_ip, env, False, False)
-      if remove_result[:2] == "OK":
-        mainlog.info('%s environment preliminary removal: %s', env, remove_result)
-      else:
-        mainlog.info('%s environment preliminary removal: ERROR - %s', env, remove_result)
-      # Create env in our fuel
-      setup_result = setup_env(admin_ip, env)
-      if setup_result == "OK":
-        mainlog.info('%s environment configuration: OK', env)
-        if args.create_only:
-          sys.exit(0)
+  # Removing env in case it exists
+  remove_result = remove_env(admin_ip, env, False, False)
+  if remove_result[:2] == "OK":
+    mainlog.info('%s environment preliminary removal: %s', env, remove_result)
+  else:
+    mainlog.info('%s environment preliminary removal: ERROR - %s', env, remove_result)
+  # Create env in our fuel
+  setup_result = setup_env(admin_ip, env)
+  if setup_result == "OK":
+    mainlog.info('%s environment configuration: OK', env)
+    if args.create_only:
+      sys.exit(0)
+    netverify_result = verify_network(admin_ip, env)
+    # Env created and configured, let's verify network before we proceed
+    if netverify_result == "OK":
+      mainlog.info('%s environment pre-deployment network verification: OK', env)
+
+      # Network is OK so we can deploy our env now
+      deploy_result = deploy_cluster(admin_ip, env)
+      #time.sleep(30)
+      #deploy_result = "OK"
+      if deploy_result == "OK":
+        mainlog.info('%s environment deployment: OK', env) 
+
+        # Env deployed, lets run network verification again
         netverify_result = verify_network(admin_ip, env)
-        # Env created and configured, let's verify network before we proceed
         if netverify_result == "OK":
-          mainlog.info('%s environment pre-deployment network verification: OK', env)
-  
-          # Network is OK so we can deploy our env now
-          deploy_result = deploy_cluster(admin_ip, env)
-          #time.sleep(30)
-          #deploy_result = "OK"
-          if deploy_result == "OK":
-            mainlog.info('%s environment deployment: OK', env) 
- 
-            # Env deployed, lets run network verification again
-            netverify_result = verify_network(admin_ip, env)
-            if netverify_result == "OK":
-              mainlog.info('%s environment post-deployment network verification: OK', env)
-            elif re.search('not implemented yet', netverify_result):
-              mainlog.info('%s environment post-deployment network verification: OK - %s', env, netverify_result)
-            else:
-              mainlog.info('%s environment post-deployment network verification: ERROR - %s', env, netverify_result)
-  
-            # Run OSTF via fuel master node and report results
-            ostf_result = run_ostf(admin_ip, env, args.log)
-            if ostf_result[:2] == "OK":
-              mainlog.info('%s environment OSTF result: %s', env,  str(ostf_result))
-            else:
-              mainlog.info('%s environment OSTF result: %s', env,  str(ostf_result))
- 
-            # We're done, let's remove our env now
-            remove_result = remove_env(admin_ip, env, True, args.keep_env)
-            if remove_result[:2] == "OK":
-              mainlog.info('%s environment removal: %s', env, remove_result)
-            else:
-              mainlog.info('%s environment removal: ERROR - %s', env, remove_result)
-  
-          else:
-            mainlog.info('%s environment deployment: ERROR - %s', env, deploy_result)
-
-            remove_result = remove_env(admin_ip, env, True, args.keep_env)
-            if remove_result[:2] == "OK":
-              mainlog.info('%s environment removal: %s', env, remove_result)
-            else:
-              mainlog.info('%s environment removal: ERROR - %s', env, remove_result)
+          mainlog.info('%s environment post-deployment network verification: OK', env)
+        elif re.search('not implemented yet', netverify_result):
+          mainlog.info('%s environment post-deployment network verification: OK - %s', env, netverify_result)
         else:
-          mainlog.info('%s environment pre-deployment network verification: ERROR - %s', env, netverify_result)
-          remove_result = remove_env(admin_ip, env, True, args.keep_env)
-          if remove_result[:2] == "OK":
-            mainlog.info('%s environment removal: %s', env, remove_result)
-          else:
-            mainlog.info('%s environment removal: ERROR - %s', env, remove_result)
+          mainlog.info('%s environment post-deployment network verification: ERROR - %s', env, netverify_result)
+
+        # Run OSTF via fuel master node and report results
+        ostf_result = run_ostf(admin_ip, env, args.log)
+        if ostf_result[:2] == "OK":
+          mainlog.info('%s environment OSTF result: %s', env,  str(ostf_result))
+        else:
+          mainlog.info('%s environment OSTF result: %s', env,  str(ostf_result))
+
+        # We're done, let's remove our env now
+        remove_result = remove_env(admin_ip, env, True, args.keep_env)
+        if remove_result[:2] == "OK":
+          mainlog.info('%s environment removal: %s', env, remove_result)
+        else:
+          mainlog.info('%s environment removal: ERROR - %s', env, remove_result)
+
       else:
-        mainlog.info('%s environment configuration: ERROR - %s', env, setup_result)
+        mainlog.info('%s environment deployment: ERROR - %s', env, deploy_result)
+
+        remove_result = remove_env(admin_ip, env, True, args.keep_env)
+        if remove_result[:2] == "OK":
+          mainlog.info('%s environment removal: %s', env, remove_result)
+        else:
+          mainlog.info('%s environment removal: ERROR - %s', env, remove_result)
+    else:
+      mainlog.info('%s environment pre-deployment network verification: ERROR - %s', env, netverify_result)
+      remove_result = remove_env(admin_ip, env, True, args.keep_env)
+      if remove_result[:2] == "OK":
+        mainlog.info('%s environment removal: %s', env, remove_result)
+      else:
+        mainlog.info('%s environment removal: ERROR - %s', env, remove_result)
+  else:
+    mainlog.info('%s environment configuration: ERROR - %s', env, setup_result)
   
 
 ###################################
