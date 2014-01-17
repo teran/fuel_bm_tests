@@ -396,7 +396,7 @@ def deploy_cluster(admin_node_ip, env_name):
 ###################################
 def main():
       # Parse args
-      parser = argparse.ArgumentParser(description='Deploy OpenStack and run tests.')
+      parser = argparse.ArgumentParser(description='Deploy OpenStack and run Fuel health check.')
       parser.add_argument("fuel_node", type=str, help="Fuel admin node IP")
       parser.add_argument('environment', type=str, help='environment name we want to deploy and test')
       parser.add_argument("log", type=str, help="Log to store results in")
