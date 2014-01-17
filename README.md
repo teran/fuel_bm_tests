@@ -23,7 +23,7 @@ export PYTHONPATH="./pylibs:./environments"
 python manage_env.py --help
 ```
 
-* deploying your own customized environment example:
+* deploying your own custom environment example:
 
 ```bash
 # set your fuel master node IP address
@@ -49,6 +49,9 @@ python manage_env.py $FUEL_MASTER_NODE myenv01 create /tmp/myenv01.log && \
 python manage_env.py $FUEL_MASTER_NODE myenv01 netverify /tmp/myenv01.log && \
 python manage_env.py $FUEL_MASTER_NODE myenv01 deploy /tmp/myenv01.log
 
+# you can run OpenStack Health Check, detailed results will be saved in $LOG.ostf
+python manage_env.py $FUEL_MASTER_NODE myenv01 ostf /tmp/myenv01.log
+cat /tmp/myenv01.log.ostf
 ```
 
 
