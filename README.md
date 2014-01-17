@@ -33,7 +33,7 @@ cp environments/010_centos_kvm_nova_flat_3nodes.py /tmp/myenvs/myenv01.py
 # customize env
 vim /tmp/myenvs/myenv01.py
 # export updated PYTHONPATH
-export PYTHONPATH="./pylibs:./environments:./tmp/myenvs"
+export PYTHONPATH="./pylibs:./environments:/tmp/myenvs"
 # you're ready to go
 python test_env.py --help
 ```
