@@ -27,7 +27,7 @@ python manage_env.py --help
 
 ```bash
 # set your fuel master node IP address
-FUEL_MASTER_NODE="172.16.100.100"
+export FUEL_MASTER_NODE="172.16.100.100"
 
 # get the tool
 git clone https://github.com/adidenko/fuel_bm_tests
