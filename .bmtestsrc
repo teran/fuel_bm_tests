@@ -31,3 +31,5 @@ export BMTEST_KS_DIFF="$BMTEST_BASE/ks.diff"
 # BMTEST_KS_CFG - how to name your custom kick-start, it will be used for Fuel node deployment
 export BMTEST_KS_CFG="/srv/tftp/ks_bmtests.cfg"
 
+# BMTEST_ENV_DIR - directory with our test environments configurations.
+export BMTEST_ENV_DIR="./environments"

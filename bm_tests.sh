@@ -6,7 +6,7 @@ if [ -f ~/.bmtestsrc ] ; then
 	. ~/.bmtestsrc
 fi
 
-export PYTHONPATH="$BMTEST_BASE/pylibs:./environments"
+export PYTHONPATH="$BMTEST_BASE/pylibs:$BMTEST_ENV_DIR"
 PYTHON_BIN="/usr/bin/python"
 
 FUEL_MASTER_NODE=`grep -o "ip=[[:digit:]]\+\.[[:digit:]]\+\.[[:digit:]]\+\.[[:digit:]]\+" $BMTEST_PXE_BOOT_FUEL_NODE | cut -d= -f2`
