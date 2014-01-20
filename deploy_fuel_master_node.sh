@@ -34,9 +34,15 @@ else
 	PXECFG="$BMTEST_PXECFG"
 fi
 
+if [ "$BMTEST_PXE_BOOT_FUEL_NODE" == "" ] ; then
+	PXESRC="$BASE/pxelinux.bootpxe"
+else
+	PXESRC="$BMTEST_PXE_BOOT_FUEL_NODE"
+fi
+
 ipmitool -H $IPMI -U $USER -P $PASS chassis bootdev pxe
 
-cp $BASE/pxelinux.bootpxe $PXECFG
+cp $PXESRC $PXECFG
 $BASE/reboot_fuel.sh y
 sleep 180 && ipmitool -H $IPMI -U $USER -P $PASS chassis bootdev disk &>/dev/null &
 sleep 180 &&  cp $BASE/pxelinux.bootlocal $PXECFG &
