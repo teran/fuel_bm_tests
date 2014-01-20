@@ -129,7 +129,12 @@ for arg in "$@" ; do
 	fi
 	if [ ! -z "$HTML_REP" ] ; then
 		HTML="$LOG.html"
-		grep -q 'ERROR' $LOG && RES="<font color=red>FAILED</font>" || RES="<font color=green>PASSED</font>"
+		if [ -s "./${ts}_${env}.anaconda.log" ] ; then
+			ANACONDA_ERR=" (Anaconda errors)"
+		else
+			ANACONDA_ERR=""
+		fi
+		grep -q 'ERROR' $LOG && RES="<font color=red>FAILED$ANACONDA_ERR</font>" || RES="<font color=green>PASSED$ANACONDA_ERR</font>"
 		# Add results zip download link
 		ZIP="<a href='${JENKINS_BUILD_URL}artifact/artifacts/$env_name.zip'>Download results</a>"
 		
