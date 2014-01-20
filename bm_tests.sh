@@ -1,5 +1,7 @@
 #!/bin/bash
 
+SLEEP="sleep 30"
+
 if [ -f ~/.bmtestsrc ] ; then
 	. ~/.bmtestsrc
 fi
@@ -76,10 +78,14 @@ for arg in "$@" ; do
 	else
 		$PYTHON_BIN manage_env.py $ARGS $FUEL_MASTER_NODE $env remove $LOG
 		$PYTHON_BIN manage_env.py $ARGS $FUEL_MASTER_NODE $env create $LOG && \
+		$SLEEP && \
 		$PYTHON_BIN manage_env.py $ARGS $FUEL_MASTER_NODE $env netverify $LOG && \
+		$SLEEP && \
 		$PYTHON_BIN manage_env.py $ARGS $FUEL_MASTER_NODE $env deploy $LOG && \
 		(
+			$SLEEP && \
 			$PYTHON_BIN manage_env.py $ARGS $FUEL_MASTER_NODE $env netverify $LOG 
+			$SLEEP && \
 			$PYTHON_BIN manage_env.py $ARGS $FUEL_MASTER_NODE $env ostf $LOG
 		)
 	fi
