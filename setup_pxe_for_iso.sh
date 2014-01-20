@@ -92,5 +92,5 @@ esac
 
 #############
 cp "$TFTP_BASE/ks.cfg" "$KS_CFG" 
-patch -p1 "$KS_CFG" < $BASE/ks.diff || exit 1
+patch -p1 "$KS_CFG" < $KS_DIFF || exit 1
 echo "DONE"
