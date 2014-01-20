@@ -11,6 +11,7 @@ bm_tests.sh:
 * ipmitool
 * dnsmasq
 * tftp
+* zip
 
 Usage
 -----
