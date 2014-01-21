@@ -154,11 +154,11 @@ for arg in "$@" ; do
 		
 		cat <<EOF > $HTML
 		<a href="#" onclick="document.getElementById('${env_name}_descr_div').style.display=(document.getElementById('${env_name}_descr_div').style.display=='block')?'none':'block';">$env_name</a> - <a href="#" onclick="document.getElementById('${env_name}_div').style.display=(document.getElementById('${env_name}_div').style.display=='block')?'none':'block';">$RES</a> - $ZIP<br>
-		<div id='${env_name}_descr_div' style='display:none;background-color:#FBFBF1;border:1px solid black;width:80%;margin:1%;'><pre>
+		<div id='${env_name}_descr_div' style='display:none;background-color:#FBFBF1;border:1px solid black;width:80%;margin:1%;'>
 EOF
 		echo -n "ISO: " >> $HTML
 		cat $LOGDIR/fuel.version >> $HTML
-		echo >> $HTML
+		echo -e "<br><br><pre>" >> $HTML
 		cat ./environments/$env.py >> $HTML
 		echo "</pre></div>" >> $HTML
 
