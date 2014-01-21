@@ -38,7 +38,10 @@ fi
 if [ "$rpl" == "Y" ] || [ "$rpl" == "y" ] ; then
 	for host in $IPMI; do
 		echo -ne "$host \t"
+		ipmitool -H $host -U $USER -P $PASS chassis bootdev pxe
+		sleep 1
 		ipmitool -H $host -U $USER -P $PASS power reset
+		sleep 1
 	done
 fi
 echo DONE

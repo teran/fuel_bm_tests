@@ -66,9 +66,23 @@ for arg in "$@" ; do
 	echo "##### Running tests for environment: $env #####"
 	echo "##### Running tests for environment: $env #####" >> ./RESULT.txt
 	if [ "$DISCOVERED_NODES" != "$TOTAL_OS_NODES" ] ; then
-		echo "Discovered nodes: $DISCOVERED_NODES, but should be $TOTAL_OS_NODES. Rebooting nodes."
+		echo -n "Discovered nodes: $DISCOVERED_NODES, but should be $TOTAL_OS_NODES. Rebooting nodes ."
 		./reboot_nodes.sh y &>/dev/null
-		sleep 180
+		for i in {1..30} ; do
+			DISCOVERED_NODES=`curl -s -X GET http://$FUEL_MASTER_NODE:8000/api/nodes | python -mjson.tool | grep discover | wc -l`
+			if [ "$DISCOVERED_NODES" != "$TOTAL_OS_NODES" ] ; then
+				echo -n "."
+				sleep 10
+			else
+				echo "DONE"
+				break
+			fi
+		done
+	fi
+	DISCOVERED_NODES=`curl -s -X GET http://$FUEL_MASTER_NODE:8000/api/nodes | python -mjson.tool | grep discover | wc -l`
+	if [ "$DISCOVERED_NODES" != "$TOTAL_OS_NODES" ] ; then
+		echo "TIMEOUT. Discovered only $DISCOVERED_NODES of $TOTAL_OS_NODES nodes. Exiting"
+		continue
 	fi
 
 	# Let's rock-n-roll
