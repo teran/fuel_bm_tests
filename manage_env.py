@@ -219,6 +219,7 @@ def setup_env(admin_node_ip, env_name):
 
   # configure networks
   network_list = client.get_networks(cluster_id)['networks']
+
   for network in network_list:
     # set vlan tags
     if network["name"] in env.net_tag:
