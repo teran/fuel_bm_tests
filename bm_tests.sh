@@ -106,7 +106,7 @@ for arg in "$@" ; do
 
 	$PYTHON_BIN manage_env.py $ARGS $FUEL_MASTER_NODE $env snapshot $LOG
 
-	if `echo "$@" | egrep -qv 'keep_env|keep-env'`; then
+	if `echo "$@" | egrep -qv 'keep_env|keep-env|create_only|create-only'`; then
 		$PYTHON_BIN manage_env.py $ARGS $FUEL_MASTER_NODE $env remove $LOG
 	fi
 
