@@ -218,7 +218,8 @@ def setup_env(admin_node_ip, env_name):
   cluster_id = client.get_cluster_id(env_name)
 
   # configure networks
-  network_list = client.get_networks(cluster_id)['networks']
+  network_conf = client.get_networks(cluster_id)
+  network_list = network_conf['networks']
 
   for network in network_list:
     # set vlan tags
@@ -244,12 +245,11 @@ def setup_env(admin_node_ip, env_name):
       network['netmask'] = str(IPNetwork(network['cidr']).netmask)
       network['network_size'] = len(list(IPNetwork((network['cidr']))))
 
-  client.update_network(cluster_id, networks=network_list)
+  network_conf['networks'] = network_list
 
   # update neutron settings
   if "net_provider" in env.settings:
     if env.settings["net_provider"] == 'neutron':
-      network_conf = client.get_networks(cluster_id)
       # check if we need to set vlan tags
       if env.settings["net_segment_type"] == 'vlan' and 'neutron_vlan_range' in env.settings:
         network_conf['neutron_parameters']['L2']['phys_nets']['physnet2']['vlan_range'] = env.settings['neutron_vlan_range']
@@ -267,8 +267,9 @@ def setup_env(admin_node_ip, env_name):
           network_conf['neutron_parameters']['predefined_networks']['net04_ext']['L3']['floating'] = env.net_ip_ranges["net04_ext"]
         else:
           network_conf['neutron_parameters']['predefined_networks']['net04_ext']['L3']['floating'] = get_range(env.net_cidr['public'], 2)
-      # push updated network to Fuel API
-      client.update_network(cluster_id, networks=network_conf, all_set=True)
+
+  # push updated network to Fuel API
+  client.update_network(cluster_id, networks=network_conf, all_set=True)
 
   # configure cluster attributes
   attributes = client.get_cluster_attributes(cluster_id)
