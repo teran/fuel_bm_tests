@@ -159,7 +159,7 @@ EOF
 		echo -n "ISO: " >> $HTML
 		cat $LOGDIR/fuel.version >> $HTML
 		echo -e "<br><br><pre>" >> $HTML
-		cat ./environments/$env.py >> $HTML
+		cat $BMTEST_ENV_DIR/$env.py >> $HTML
 		echo "</pre></div>" >> $HTML
 
 		cat <<EOF >> $HTML
