@@ -18,7 +18,7 @@ export BMTEST_PXECFG="/srv/tftp/pxelinux.cfg/01-00-11-22-33-44-55"
 
 # BMTEST_PXE_BOOT_FUEL_NODE - our PXE cfg file we'll use to deploy Fuel master ( it 
 #                 will be copied to $BMTEST_PXECFG during Fuel master deployment
-export BMTEST_PXE_BOOT_FUEL_NODE="$BMTEST_BASE/pxelinux.bootpxe"
+export BMTEST_PXE_BOOT_FUEL_NODE="$BMTEST_BASE/01_setup/configs/pxelinux.bootpxe"
 
 # IPMI info for OpenStack nodes
 export BMTEST_OSNODES_IPMI_IPS="172.16.1.101 172.16.1.102 172.16.1.103 172.16.1.104"
@@ -26,10 +26,10 @@ export BMTEST_OSNODES_IPMI_USER="ipmiuser"
 export BMTEST_OSNODES_IPMI_PASS="ipmipass"
 
 # You may want to customize default Fuel kick-start cfg, you can do it with BMTEST_KS_DIFF
-export BMTEST_KS_DIFF="$BMTEST_BASE/ks.diff"
+export BMTEST_KS_DIFF="$BMTEST_BASE/01_setup/configs/ks.diff"
 
 # BMTEST_KS_CFG - how to name your custom kick-start, it will be used for Fuel node deployment
 export BMTEST_KS_CFG="/srv/tftp/ks_bmtests.cfg"
 
 # BMTEST_ENV_DIR - directory with our test environments configurations.
-export BMTEST_ENV_DIR="./environments"
+export BMTEST_ENV_DIR="./01_setup/environments"
