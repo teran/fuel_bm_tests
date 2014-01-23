@@ -172,7 +172,7 @@ def remove_env(admin_node_ip, env_name):
     return "Can't delete cluster"
 
   # wait for removed nodes to come back online
-  for i in range(180):
+  for i in range(90):
     cur_nodes = client.list_nodes()
     if len(cur_nodes) < len(all_nodes):
       time.sleep(10)
