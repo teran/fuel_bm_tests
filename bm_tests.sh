@@ -86,6 +86,7 @@ for arg in "$@" ; do
 	fi
 
 	# Let's rock-n-roll
+	DEPLOY="no"
 	if `echo "$@" | egrep -q 'create_only|create-only'`; then
 		$PYTHON_BIN manage_env.py $ARGS $FUEL_MASTER_NODE $env remove $LOG
 		$PYTHON_BIN manage_env.py $ARGS $FUEL_MASTER_NODE $env create $LOG
@@ -97,11 +98,12 @@ for arg in "$@" ; do
 		$SLEEP && \
 		$PYTHON_BIN manage_env.py $ARGS $FUEL_MASTER_NODE $env deploy $LOG && \
 		(
+			DEPLOY="done"
 			$SLEEP && \
 			$PYTHON_BIN manage_env.py $ARGS $FUEL_MASTER_NODE $env netverify $LOG 
 			$SLEEP && \
 			$PYTHON_BIN manage_env.py $ARGS $FUEL_MASTER_NODE $env ostf $LOG
-		)
+		) || DEPLOY="failed"
 	fi
 
 	$PYTHON_BIN manage_env.py $ARGS $FUEL_MASTER_NODE $env snapshot $LOG
@@ -130,10 +132,14 @@ for arg in "$@" ; do
 			rm -rf localhost/var/log/remote/node-*
 			mv tmplogs/node-* localhost/var/log/remote/
 			rm -rf tmplogs
-			egrep 'crit:|raise LVMError' localhost/var/log/remote/node-*/install/anaconda.log > anaconda.log
+			if [ "$DEPLOY" != "no" ] ; then
+				egrep 'crit:|raise LVMError' localhost/var/log/remote/node-*/install/anaconda.log > anaconda.log
+			fi
 		popd &>/dev/null
 
-		mv $LOGDIR/$SNAPDIR/anaconda.log ./${ts}_${env}.anaconda.log &>/dev/null
+		if [ -f "$LOGDIR/$SNAPDIR/anaconda.log" ] ; then
+			mv $LOGDIR/$SNAPDIR/anaconda.log ./${ts}_${env}.anaconda.log &>/dev/null
+		fi
 
 		pushd $LOGDIR &>/dev/null
 			rm -f $SNAPSHOT snapshot.tgz
