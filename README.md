@@ -20,7 +20,7 @@ Usage
 ```bash
 git clone https://github.com/adidenko/fuel_bm_tests
 cd fuel_bm_tests
-export PYTHONPATH="./pylibs:./environments"
+export PYTHONPATH="./pylibs:./01_setup/environments"
 python manage_env.py --help
 ```
 
@@ -36,13 +36,13 @@ cd fuel_bm_tests
 
 # create your env file
 mkdir /tmp/myenvs
-cp environments/010_centos_kvm_nova_flat_3nodes.py /tmp/myenvs/myenv01.py
+cp 01_setup/environments/010_centos_kvm_nova_flat_3nodes.py /tmp/myenvs/myenv01.py
 
 # customize env file
 vim /tmp/myenvs/myenv01.py
 
 # export updated PYTHONPATH to include path to your custom envs
-export PYTHONPATH="./pylibs:./environments:/tmp/myenvs"
+export PYTHONPATH="./pylibs:/tmp/myenvs"
 
 # you're ready to go
 python manage_env.py --help
