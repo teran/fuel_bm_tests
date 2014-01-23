@@ -1,0 +1,18 @@
+DEFAULT /syslinux/menu.c32
+PROMPT 0
+TIMEOUT 100
+
+MENU TITLE PXE Boot Menu for Fuel bare-metal tests
+MENU AUTOBOOT Starting Local System boot in # seconds
+
+LABEL local
+  MENU LABEL ^Local Boot
+  localboot 0
+
+LABEL fuelbmtests
+  MENU LABEL Install ^Fuel Master for BM tests
+  MENU default
+  KERNEL /fuel_bmtests/isolinux/vmlinuz
+  INITRD /fuel_bmtests/isolinux/initrd.img
+  APPEND ks=nfs:172.18.122.108:/var/lib/tftpboot/ks_bmtests.cfg repo=nfs:172.18.122.108:/var/lib/tftpboot/fuel_bmtests ksdevice=eth0 ip=172.18.122.104 netmask=255.255.255.240 gw=172.18.122.97 dns1=172.18.80.136 hostname=fmdell.local.int showmenu=no biosdevname=0
+

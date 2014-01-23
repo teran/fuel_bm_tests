@@ -1,0 +1,50 @@
+--- fuel_bmtests/ks.cfg	2014-01-19 16:38:30.000000000 -0500
++++ ks_bmtests.cfg	2014-01-20 05:34:58.292095572 -0500
+@@ -48,7 +48,8 @@
+         echo
+         echo "Possible choices: ${drives}"
+         echo
+-        read -p "Choose hard drive: " tgtdrive
++#        read -p "Choose hard drive: " tgtdrive
++	tgtdrive="sda"
+     done
+     clear
+     chvt 1
+@@ -214,6 +215,8 @@
+     fi
+ }
+ 
++echo -e "DEVICE=eth1\nBOOTPROTO=static\nIPADDR=192.168.50.1\nNETMASK=255.255.255.0\n" > /etc/sysconfig/network-scripts/ifcfg-eth1
++
+ # Default FQDN
+ hostname="nailgun.mirantis.com"
+ 
+@@ -305,6 +308,12 @@
+ chmod 0777 /usr/local/sbin/bootstrap_admin_node.sh
+ cp ${SOURCE}/bootstrap_admin_node.conf /etc/init/bootstrap_admin_node.conf
+ echo "ENABLED=1" > /etc/sysconfig/bootstrap_admin_node
++# Dirty hacks for bare-metal automation
++sed -e 's#iface=eth0#iface=eth1#' -i /usr/local/sbin/bootstrap_admin_node.sh
++cat > /usr/local/sbin/anaconda_lvm_bug_hack.sh << EOF
++echo -e "#raw\nwhile : ; do\n\tegrep -q 'CRITICAL: anaconda .* exception report' /tmp/anaconda.log && egrep -q 'LVMError: lvactivate failed' /tmp/anaconda.log && reboot ;\n\tsleep 10;\ndone &\n#end raw" > /var/lib/cobbler/snippets/anaconda_lvm_bug_workaround
++sed -e "s#('pre_install_network_config')#('pre_install_network_config')\n\n\\\$SNIPPET('anaconda_lvm_bug_workaround')#" -i /var/lib/cobbler/kickstarts/centos-x86_64.ks
++EOF
+ 
+ # Copying version.yaml file. It contains COMMIT_SHA of last commit.
+ mkdir -p /etc/nailgun
+@@ -338,6 +347,8 @@
+ EOF
+ 
+ echo "sed -i \"s%\(^.*able on:\).*$%\1 http://\`ip address show eth0 | awk '/inet / {print \$2}' | cut -d/ -f1 -\`:8000%\" /etc/issue" >>/etc/rc.local
++echo >> /etc/rc.local
++echo "#iptables -t nat -I POSTROUTING -s 172.16.0.0/24 -j MASQUERADE" >> /etc/rc.local
+ 
+ # Unmounting source
+ umount -f ${SOURCE}
+@@ -374,4 +385,4 @@
+ # Blacklist i2c_piix4 module for VirtualBox so it does not create kernel errors
+ [[ $(virt-what) = "virtualbox" ]] && echo "blacklist i2c_piix4" > /etc/modprobe.d/blacklist-i2c-piix4.conf
+ 
+-%end
+\ No newline at end of file
++%end
