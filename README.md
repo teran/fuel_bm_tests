@@ -60,6 +60,8 @@ cat /tmp/myenv01.log.ostf
 
     * Copy ```.bmtestsrc``` file to your jenkins user homedir
     * Edit ```.bmtestsrc``` in your jenkins user homedir to adjust it to your bare-metal environment
+    * Edit files in your ```??_setup/configs/``` directory to adjust them to your bare-metal environment
+    * Start dnsmasq in order to prepare DHCP/PXE service, examples can be found in ```??_setup/configs/``` directories
     * Create a jenkins job with the following Build action (shell script):
 
 ```bash
