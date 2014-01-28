@@ -305,7 +305,7 @@ def setup_env(admin_node_ip, env_name):
   for node in all_nodes:
     if node['cluster'] == None and (node_local_id < len(env.node_roles) or node['mac'] in env.special_roles):
       if node['mac'] in env.special_roles:
-        node_role = env.special_roles['mac']
+        node_role = env.special_roles[node['mac']]
       else:
         node_role = env.node_roles[node_local_id]
         node_local_id += 1
