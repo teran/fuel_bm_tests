@@ -91,7 +91,7 @@ case "$HOW" in
 esac
 
 #############
-rm -f "$KS_CFG"
-cp "$TFTP_BASE/ks.cfg" "$KS_CFG" 
-patch -p1 "$KS_CFG" < $KS_DIFF || exit 1
+# rm -f "$KS_CFG"
+# cp "$TFTP_BASE/ks.cfg" "$KS_CFG" 
+# patch -p1 "$KS_CFG" < $KS_DIFF || exit 1
 echo "DONE"
